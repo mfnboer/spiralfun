@@ -2,15 +2,18 @@
 import math
 import imageio
 import io
-from tkinter import *
+import tkinter as tki
+from typing import List
 
 STEP_SIZE = math.radians(1) * 0.05
 REDRAW_STEP = math.radians(5)
+
 
 def calc_distance(point1, point2):
     dx = point2[0] - point1[0]
     dy = point2[1] - point1[1]
     return math.sqrt(dx ** 2 + dy ** 2)
+
 
 def calc_angle(origin, point):
     dy = point[1] - origin[1]
@@ -27,6 +30,7 @@ def calc_angle(origin, point):
         return angle
 
     return math.pi - angle
+
 
 class Circle:
     def __init__(self, space, center, radius) -> None:
@@ -72,14 +76,15 @@ class Circle:
         y = math.sin(angle) * d + rotation_center[1]
         self.moveto((x, y))
 
+
 class Space:
     def __init__(self, width: int, height: int) -> None:
         self.__movie_writer = None
         self.__width = width
         self.__height = height
-        self.__canvas = Canvas(width=width, height=height, bg='white')
-        self.__canvas.pack(expand=YES,fill=BOTH)
-        self.__circles = []
+        self.__canvas = tki.Canvas(width=width, height=height, bg='white')
+        self.__canvas.pack(expand=tki.YES, fill=tki.BOTH)
+        self.__circles: List[Circle] = []
 
     def get_canvas(self):
         return self.__canvas
@@ -92,8 +97,9 @@ class Space:
     def canvas2space(self, point):
         x = point[0] - self.__width / 2.0
         y = self.__height / 2.0 - point[1]
+        return (x, y)
 
-    def add_circle(self, radius, draw_line = False):
+    def add_circle(self, radius, draw_line=False):
         if not self.__circles:
             circle = Circle(self, (0.0, 0.0), radius)
         else:
@@ -106,7 +112,7 @@ class Space:
         self.__circles.append(circle)
 
     def rotate_circle(self, index, nsteps):
-        rotation_center = self.__circles[index-1].get_center()
+        rotation_center = self.__circles[index - 1].get_center()
         clockwise = nsteps > 0
 
         for i in range(index, len(self.__circles)):
@@ -125,15 +131,16 @@ class Space:
         if not self.__movie_writer:
             self.__movie_writer = imageio.get_writer(file_name + '.gif', mode='I')
 
-        #self.save_image(file_name)
+        # self.save_image(file_name)
         ps = self.__canvas.postscript()
-        #image = imageio.imread(file_name + '.ps')
+        # image = imageio.imread(file_name + '.ps')
         byte_stream = io.BytesIO(ps.encode('utf-8'))
         image = imageio.imread(byte_stream)
         self.__movie_writer.append_data(image)
 
+
 def main() -> int:
-    space = Space(1000,1000)
+    space = Space(1000, 1000)
     space.add_circle(150)
     space.add_circle(100)
     space.add_circle(50)
@@ -150,10 +157,10 @@ def main() -> int:
 
         if redraw > REDRAW_STEP:
             space.redraw()
-            #space.add_movie_frame('aap')
+            # space.add_movie_frame('aap')
             redraw = 0
 
-    #space.save_image('foo')
+    # space.save_image('foo')
 
-    mainloop()
+    tki.mainloop()
     return 0
