@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+from typing import Optional
 import math
 import imageio
 import io
 import tkinter as tki
-from typing import List
+
+PointType = tuple[float, float]
+CanvasPointType = tuple[int, int]
 
 STEP_SIZE = math.radians(1) * 0.05
 REDRAW_STEP = math.radians(5)
 
 
-def calc_distance(point1, point2):
+def calc_distance(point1: PointType, point2: PointType) -> float:
     dx = point2[0] - point1[0]
     dy = point2[1] - point1[1]
     return math.sqrt(dx ** 2 + dy ** 2)
 
 
-def calc_angle(origin, point):
+def calc_angle(origin: PointType, point: PointType) -> float:
     dy = point[1] - origin[1]
     r = calc_distance(origin, point)
 
@@ -33,7 +37,7 @@ def calc_angle(origin, point):
 
 
 class Circle:
-    def __init__(self, space, center, radius) -> None:
+    def __init__(self, space: Space, center: PointType, radius: float) -> None:
         self.__space = space
         self.__center = center
         self.__radius = radius
@@ -46,16 +50,16 @@ class Circle:
         y2 = canvas_center[1] + radius
         self.__id = canvas.create_oval(x1, y1, x2, y2, outline='lightgreen')
 
-    def get_center(self):
+    def get_center(self) -> PointType:
         return self.__center
 
-    def get_radius(self):
+    def get_radius(self) -> float:
         return self.__radius
 
-    def set_draw(self, draw: bool):
+    def set_draw(self, draw: bool) -> None:
         self.__draw = draw
 
-    def moveto(self, new_center):
+    def moveto(self, new_center: PointType) -> None:
         canvas = self.__space.get_canvas()
         canvas_new_center = self.__space.space2canvas(new_center)
 
@@ -68,7 +72,7 @@ class Circle:
         y = canvas_new_center[1] - self.__radius
         canvas.moveto(self.__id, x, y)
 
-    def rotate(self, rotation_center, clockwise=True):
+    def rotate(self, rotation_center: PointType, clockwise: bool = True):
         angle = calc_angle(rotation_center, self.__center)
         angle += -STEP_SIZE if clockwise else STEP_SIZE
         d = calc_distance(rotation_center, self.__center)
@@ -79,27 +83,27 @@ class Circle:
 
 class Space:
     def __init__(self, width: int, height: int) -> None:
-        self.__movie_writer = None
+        self.__movie_writer: Optional[imageio.core.format.Format.Writer] = None
         self.__width = width
         self.__height = height
         self.__canvas = tki.Canvas(width=width, height=height, bg='white')
         self.__canvas.pack(expand=tki.YES, fill=tki.BOTH)
-        self.__circles: List[Circle] = []
+        self.__circles: list[Circle] = []
 
-    def get_canvas(self):
+    def get_canvas(self) -> tki.Canvas:
         return self.__canvas
 
-    def space2canvas(self, point):
-        x = self.__width / 2.0 + point[0]
-        y = self.__height / 2.0 - point[1]
+    def space2canvas(self, point: PointType) -> CanvasPointType:
+        x = round(self.__width / 2.0 + point[0])
+        y = round(self.__height / 2.0 - point[1])
         return (x, y)
 
-    def canvas2space(self, point):
+    def canvas2space(self, point: CanvasPointType) -> PointType:
         x = point[0] - self.__width / 2.0
         y = self.__height / 2.0 - point[1]
         return (x, y)
 
-    def add_circle(self, radius, draw_line=False):
+    def add_circle(self, radius: float, draw_line: bool = False) -> None:
         if not self.__circles:
             circle = Circle(self, (0.0, 0.0), radius)
         else:
@@ -111,7 +115,10 @@ class Space:
         circle.set_draw(draw_line)
         self.__circles.append(circle)
 
-    def rotate_circle(self, index, nsteps):
+    def rotate_circle(self, index: int, nsteps: int) -> None:
+        if index < 1 or index > len(self.__circles):
+            raise IndexError
+
         rotation_center = self.__circles[index - 1].get_center()
         clockwise = nsteps > 0
 
@@ -121,13 +128,13 @@ class Space:
             for n in range(0, abs(nsteps)):
                 circle.rotate(rotation_center, clockwise)
 
-    def redraw(self):
+    def redraw(self) -> None:
         self.__canvas.update()
 
-    def save_image(self, file_name):
+    def save_image(self, file_name: str) -> None:
         self.__canvas.postscript(file=file_name + '.ps')
 
-    def add_movie_frame(self, file_name):
+    def add_movie_frame(self, file_name: str) -> None:
         if not self.__movie_writer:
             self.__movie_writer = imageio.get_writer(file_name + '.gif', mode='I')
 
