@@ -10,7 +10,7 @@ PointType = tuple[float, float]
 CanvasPointType = tuple[int, int]
 
 STEP_SIZE = math.radians(1) * 0.05
-REDRAW_STEP = math.radians(5)
+REDRAW_STEP = math.radians(1)
 
 
 def calc_distance(point1: PointType, point2: PointType) -> float:
@@ -138,9 +138,7 @@ class Space:
         if not self.__movie_writer:
             self.__movie_writer = imageio.get_writer(file_name + '.gif', mode='I')
 
-        # self.save_image(file_name)
         ps = self.__canvas.postscript()
-        # image = imageio.imread(file_name + '.ps')
         byte_stream = io.BytesIO(ps.encode('utf-8'))
         image = imageio.imread(byte_stream)
         self.__movie_writer.append_data(image)
@@ -149,22 +147,26 @@ class Space:
 def main() -> int:
     space = Space(1000, 1000)
     space.add_circle(150)
-    space.add_circle(100)
-    space.add_circle(50)
-    space.add_circle(11)
+    space.add_circle(80)
+    space.add_circle(40, draw_line=False)
+    space.add_circle(20, draw_line=False)
+    space.add_circle(10, draw_line=False)
+    space.add_circle(5, draw_line=False)
     space.add_circle(1, draw_line=True)
 
     redraw = 0.0
     for r in range(0, int(math.pi * 2 / STEP_SIZE)):
         space.rotate_circle(1, 1)
-        space.rotate_circle(2, -7)
-        space.rotate_circle(3, 13)
-        space.rotate_circle(4, -41)
+        space.rotate_circle(2, -3)
+        space.rotate_circle(3, 9)
+        space.rotate_circle(4, -27)
+        space.rotate_circle(5, 81)
+        space.rotate_circle(6, -243)
         redraw += STEP_SIZE
 
         if redraw > REDRAW_STEP:
             space.redraw()
-            # space.add_movie_frame('aap')
+            space.add_movie_frame('counterclock')
             redraw = 0
 
     # space.save_image('foo')
