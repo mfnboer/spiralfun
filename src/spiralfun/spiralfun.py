@@ -169,6 +169,9 @@ def main() -> int:
             space.add_movie_frame('counterclock')
             redraw = 0
 
+    # save last frame
+    space.add_movie_frame('counterclock')
+
     # space.save_image('foo')
 
     tki.mainloop()
