@@ -116,7 +116,7 @@ class Space:
         self.__circles.append(circle)
 
     def rotate_circle(self, index: int, nsteps: int) -> None:
-        if index < 1 or index > len(self.__circles):
+        if index < 1 or index >= len(self.__circles):
             raise IndexError
 
         rotation_center = self.__circles[index - 1].get_center()
