@@ -40,6 +40,7 @@ class Circle:
     def __init__(self, space: Space, center: PointType, radius: float) -> None:
         self.__space = space
         self.__center = center
+        self.__draw_pos = center
         self.__radius = radius
         self.__draw = False
         canvas = space.get_canvas()
@@ -63,9 +64,10 @@ class Circle:
         canvas = self.__space.get_canvas()
         canvas_new_center = self.__space.space2canvas(new_center)
 
-        if self.__draw:
-            canvas_old_center = self.__space.space2canvas(self.__center)
-            canvas.create_line(canvas_old_center[0], canvas_old_center[1], canvas_new_center[0], canvas_new_center[1])
+        if self.__draw and calc_distance(self.__draw_pos, new_center) >= 1.0:
+            line_start = self.__space.space2canvas(self.__draw_pos)
+            canvas.create_line(line_start[0], line_start[1], canvas_new_center[0], canvas_new_center[1])
+            self.__draw_pos = new_center
 
         self.__center = new_center
         x = canvas_new_center[0] - self.__radius
@@ -166,11 +168,11 @@ def main() -> int:
 
         if redraw > REDRAW_STEP:
             space.redraw()
-            space.add_movie_frame('counterclock')
+            # space.add_movie_frame('counterclock')
             redraw = 0
 
     # save last frame
-    space.add_movie_frame('counterclock')
+    # space.add_movie_frame('counterclock')
 
     # space.save_image('foo')
 
